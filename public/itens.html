@@ -76,24 +76,28 @@
     <h2>✨Visão Geral dos usuários✨</h2>
     <div id="status">🙄Carregando...</div>
     <div id="lista">
-      <! -- A lista de usuários será inserida aqui  -->
+      <!--// A lista de usuários será inserida aqui  -->
     </div>
 
     <div>
-      <button id="botaoAdicionarusuario" onclick="mostrarFormulario()">+ Adicionar Pessoa</button>
+      <button id="botaoAdicionarusuario" onclick="mostrarFormulario()">
+        + Adicionar Pessoa
+      </button>
     </div>
 
     <form id="formulario" style="display: none">
       <label> Nome: </label>
-      <imput type="text" id="nome" name="nome" />
+      <input type="text" id="nome" name="nome" required />
 
       <label> Login: </label>
-      <imput type="text" id="login" name="login" />
+      <input type="text" id="login" name="login" required />
 
       <label> Senha: </label>
-      <imput type="password" id="senha" name="senha" />
+      <input type="password" id="senha" name="senha" required />
 
-      <button type="submit" onClick="adicionarPessoa()"> Adicionar Pessoa </button>
+      <button type="submit" onClick="adicionarPessoa()" required>
+        Adicionar Pessoa
+      </button>
     </form>
 
     <script>
@@ -112,8 +116,12 @@
         console.log("\n Responses:", response, "\n Pessoas:", pessoas);
 
         const container = document.getElementById("lista");
+
         const ul = document.createElement("ul");
+        ul.style.border = "2px solid red";
+
         const li = document.createElement("li");
+        li.style.border = "2px solid blue";
 
         for (let c = 0; c < pessoas.length; c++) {
           const pessoa = pessoas[c];
@@ -121,6 +129,19 @@
 
           const li = document.createElement("li");
           li.textContent = texto;
+          ul.appendChild(li);
+
+          const span = document.createElement("span");
+          span.textContent = texto;
+
+          const botao = document.createElement("button");
+          botao.textContent = "X";
+          botao.style.marginLeft = "10px";
+          botao.onclick = () => deletarPessoa(pessoa.id, li);
+
+          li.appendChild(span);
+          li.appendChild(botao);
+          ul.appendChild(li);
         }
         container.appendChild(ul);
       }
@@ -128,48 +149,66 @@
 
       function mostrarFormulario() {
         const formulario = document.getElementById("formulario");
+        const botaoAdicionarusuario = document.getElementById(
+          "botaoAdicionarusuario"
+        );
 
-        if (formulario.style.display === "block") {
-       formulario.style.display = "none";
-         botaoAdicionarusuario.innerText = "+ Adicionar Pessoa";
-      
+        if (formulario.style.display === "none") {
+          botaoAdicionarusuario.innerText = "Ocultar Formulário";
+          formulario.style.display = "block";
         } else {
-          botaoAdicionarusuario.style.display= "block";
-         botaoAdicionarusuario.innerText = "Ocultar Formulário";
+          botaoAdicionarusuario.innerText = "Adicionar Pessoas";
+          botaoAdicionarusuario.style.display = "none";
         }
       }
 
-   function adicionarPessoa(){
-   const nome = document.getElementById("nome").value.trim();
-   const login = document.getElementById("login").value.trim();
-    const senha = document.getElementById("senha").value.trim();
-  console.log("NOME: ", nome, "\n LOGIN: ", login, "\n SENHA: ", senha);
-    console.log("Adicionando pessoa...");
+      function adicionarPessoa() {
+        event.preventDefault();
+        const nome = document.getElementById("nome").value.trim();
+        const login = document.getElementById("login").value.trim();
+        const senha = document.getElementById("senha").value.trim();
 
-    if(!nome || !login || !senha){
-      alert("Por favor, preencha todos os campos.");
-      return;
-    
-   
-   
-    }
-  }  alert("Pessoa adicionada com sucesso!");
-     document.getElementById("formulario").reset();
+        console.log("NOME: ", nome, "\n LOGIN: ", login, "\n SENHA: ", senha);
+        console.log("Adicionando pessoa...");
 
-     const novaPessoa = { nome, login, senha };
+        if (!nome || !login || !senha) {
+          alert("Por favor, preencha todos os campos.");
+          return;
+        }
 
-     const container = document.getElementById("lista");
-      let ul = container.querySelector("ul") || document.createElement("ul");
-     
-     if(!ul){
-     ul = document.createElement("ul");
-     container.appendChild(ul);
-      const li = document.createElement("li");
-      li.textContent = `NOME: ${novaPessoa.nome} -- LOGIN: ${novaPessoa.login} -- SENHA: ${novaPessoa.senha}`;
-      ul.appendChild(li);
-     }
+        alert("Pessoa adicionada com sucesso!");
+        document.getElementById("formulario").reset();
 
+        const novaPessoa = { nome, login, senha };
 
+        const container = document.getElementById("lista");
+        let ul = container.querySelector("ul");
+
+        if (!ul) {
+          ul = document.createElement("ul");
+          container.appendChild(ul);
+
+          const li = document.createElement("li");
+          li.textContent = `NOME: ${novaPessoa.nome} -- LOGIN: ${novaPessoa.login} -- SENHA: ${novaPessoa.senha}`;
+          ul.appendChild(li);
+        }
+      }
+
+      async function deletarPessoa(id, li) {
+        console.log("Deletando pessoa com id:", id);
+
+        const response = await fetch(`/pessoas/${id}`, {
+          method: "DELETE",
+        });
+
+        if (response.ok) {
+          alert("Pessoa deletada com sucesso!");
+        li.remove();
+        
+        } else {
+          alert("Não foi possível deletar a pessoa.");
+        }
+      }
     </script>
   </body>
 </html>

@@ -1,3 +1,4 @@
+const { log } = require("console");
 const express = require("express");
 const path = require("path");
 const app = express();
@@ -14,50 +15,36 @@ let pessoas = [
     nome: "Lara",
     login: "admin",
     senha: "123",
-    idade: 14,
-    irmaos: true,
-    cidade: "São Paulo",
-    hobby: "Desenhar",
+
+    
   },
   {
     id: 2,
     nome: "Gaby",
     login: "admin1",
-    senha: "123",
-    idade: 13,
-    irmaos: false,
-    cidade: "Rio de Janeiro",
-    hobby: "Tocar violão",
+    senha: "123"
+    
   },
   {
     id: 3,
     nome: "Anna Laura",
     login: "admin3",
-    senha: "123",
-    idade: 14,
-    irmaos: true,
-    cidade: "Belo Horizonte",
-    hobby: "Dançar",
+    senha: "123"
+   
   },
   {
     id: 4,
     nome: "Yasmin",
     login: "admin4",
-    senha: "123",
-    idade: 13,
-    irmaos: true,
-    cidade: "Salvador",
-    hobby: "Ler livros",
+    senha: "123"
+   
   },
   {
     id: 5,
     nome: "Lynne",
     login: "admin5",
-    senha: "123",
-    idade: 13,
-    irmaos: true,
-    cidade: "Curitiba",
-    hobby: "Jogar videogame",
+    senha: "123"
+   
   },
 ];
 
@@ -101,35 +88,65 @@ app.post("/login", (req, res) => {
   res.redirect("/itens.html");
 });
 
-
 app.get("/itens.html", (req, res) => {
+  console.log("chegou aqui");
   res.sendFile(path.join(publicDir, "itens.html"));
+});
+
+//get
+app.get("/pessoas", (req, res) => {
+  res.json(pessoas);
 });
 
 //post
 app.post("/pessoas", (req, res) => {
- 
- const pessoaExiste = pessoas.findIndex((p) => p.login === req.body.login);
+  const pessoaExiste = pessoas.findIndex((p) => p.login === req.body.login);
   if (pessoaExiste !== -1) {
     return res.status(400).json({ message: "Login já existe" });
   }
   const novaPessoa = {
-    id:pessoas.length +1,
+    id: pessoas.length + 1,
     nome: req?.body?.nome,
     idade: req?.body?.idade,
     irmaos: req?.body?.irmaos,
     cidade: req?.body?.cidade,
     hobby: req?.body?.hobby,
+  };
+  pessoas.push(novaPessoa);
+  console.log(pessoas);
+  res
+    .status(201)
+    .json({ message: "Pessoa cadastrada com sucesso", novaPessoa });
+});
+
+app.delete("/pessoas/:id", (req, res) => {
+  const id = parseInt(req.params.id);
+  const pessoaIndex = pessoas.findIndex((p) => p.id === id);
+  if (pessoaIndex === -1) {
+    return res.status(404).json({ message: "Pessoa não encontrada" });
   }
-    pessoas.push(novaPessoa);
-    console.log(pessoas);
-    res.status(201).json({ message: "Pessoa cadastrada com sucesso", novaPessoa });
-    
-  
-  });
 
+  pessoas.splice(pessoaIndex, 1);
+  res.json({ message: "Pessoa deletada com sucesso" });
+});
 
+app.put("/pessoas/:id", (req, res) => {
+  const id = parseInt(req.params.id);
 
+  const pessoaIndex = pessoas.findIndex((p) => p.id === id);
+  if (pessoaIndex === -1) {
+    return res.status(404).json({ message: "Pessoa não encontrada" });
+  }
+  const pessoaAtualizada = {
+    id: id,
+    nome: req?.body?.nome,
+    login: req?.body?.login,
+    senha: req?.body?.senha,
+   
+  };
+  pessoas[pessoaIndex] = pessoaAtualizada;
+  res.json({ message: "Pessoa atualizada com sucesso", pessoaAtualizada });
+});
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
